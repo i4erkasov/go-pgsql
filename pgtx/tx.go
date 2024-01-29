@@ -1,8 +1,9 @@
-package pgxpool
+package pgtx
 
 import (
 	"context"
 	"errors"
+	pgxpool2 "github.com/i4erkasov/go-pgsql/pgxpool"
 	"github.com/jackc/pgx/v4/pgxpool"
 	"sync/atomic"
 )
@@ -18,12 +19,12 @@ type ITxManager interface {
 
 // TxManager is a concrete implementation of TxManagerInterface using pgxpool.
 type TxManager struct {
-	conn *Pool
+	conn *pgxpool2.Pool
 }
 
 // NewTxManager creates a new instance of TxManager with a given registry.
 // It uses the master connection pool for managing transactions.
-func NewTxManager(registry *Registry) (ITxManager, error) {
+func NewTxManager(registry *pgxpool2.Registry) (ITxManager, error) {
 	pools, err := registry.Pools()
 	if err != nil {
 		return nil, err

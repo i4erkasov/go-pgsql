@@ -151,12 +151,12 @@ To begin a transaction, simply call the `Begin` method on an instance of `TxMana
 
 ```go
 import (
-    "github.com/i4erkasov/go-pgsql/pgxpool"
+    "github.com/i4erkasov/go-pgsql/tx"
 )
 
 // ...
 
-txManager, err := pgxpool.NewTxManager(registry)
+txManager, err := tx.NewTxManager(registry)
 if err != nil {
 // Handle error
 }
@@ -285,6 +285,7 @@ pgsql:
       driver: "postgres" # Default: "postgres"
       table: "migrations" # Default: "migrations"
       path: "migrations" # Default: "migrations"
+      scheme: "public" # Default: "public"
       dsn: "postgres://user:password@127.0.0.1:5432/db?sslmode=disable&client_encoding=UTF8"
       conn_max_lifetime: '10m' # Default: 10 minutes
 ```
@@ -292,7 +293,7 @@ pgsql:
 ```go
 import (
     "github.com/spf13/viper"
-    "github.com/i4erkasov/migrate"
+    "github.com/i4erkasov/go-pgsql/migrate"
 )
 
 func main() {
@@ -304,11 +305,6 @@ func main() {
     if err != nil {
         // Handle error
     }
-
-    // Use migrator to apply migrations
-    migration.Up(context.Background())
-    // or
-    migration.Down(context.Background(), 1) // Number of steps to migrate down
 }
 ```
 
