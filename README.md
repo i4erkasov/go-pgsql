@@ -1,4 +1,7 @@
 # go-pgsql
+[![PkgGoDev](https://godoc.org/github.com/i4erkasov/go-pgsql?status.svg)](https://pkg.go.dev/github.com/i4erkasov/go-pgsql?tab=doc)
+![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/i4erkasov/go-pgsql)
+[![Go Report Card](https://goreportcard.com/badge/github.com/i4erkasov/go-pgsql)](https://goreportcard.com/report/github.com/i4erkasov/go-pgsql)
 
 `go-pgsql` is a comprehensive Go package that facilitates managing PostgreSQL connection pools, database migrations, and transaction management. It leverages the robust `pgx` library for pool management and `golang-migrate` for database migrations, providing a full suite of tools for working with PostgreSQL in Go applications.
 
