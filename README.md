@@ -7,7 +7,7 @@
 
 ## Features
 
-- *[Connection Pool Management](#connection-pool-management)* (`pgxpool`): Simplifies the creation and management of connection pools using `pgxpool`.
+- *[Connection Pool Management](#connection-pool-management)*: Simplifies the creation and management of connection pools using `pgxpool`.
 - *[Transaction Management](#transaction-management)*: Offers a convenient transaction manager that supports nested transactions and automatic error handling.
 - *[Database Migrations](#migrate)*: Allows for smooth database schema migrations using the `golang-migrate` package.
 
