@@ -249,11 +249,6 @@ func main() {
     if err != nil {
         // Handle error
     }
-
-    // Use migrator to apply migrations
-	migration.Up(context.Background())
-    // or
-    migration.Down(context.Background(), 1) // Number of steps to migrate down
 }
 ```
 
