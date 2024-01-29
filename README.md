@@ -4,9 +4,9 @@
 
 ## Features
 
-- **Connection Pool Management (`pgxpool`)**: Simplifies the creation and management of connection pools using `pgxpool`.
-- **Database Migrations**: Allows for smooth database schema migrations using the `golang-migrate` package.
-- **Transaction Management**: Offers a convenient transaction manager that supports nested transactions and automatic error handling.
+- *[Connection Pool Management](#connection-pool-management)* (`pgxpool`): Simplifies the creation and management of connection pools using `pgxpool`.
+- *[Transaction Management](#transaction-management)*: Offers a convenient transaction manager that supports nested transactions and automatic error handling.
+- *[Database Migrations](#migrate)*: Allows for smooth database schema migrations using the `golang-migrate` package.
 
 ## External Packages
 
@@ -19,22 +19,10 @@ This package uses the following external libraries:
 ## Installation
 
 ```bash
-go get github.com/i4erkasov/go-pgsql
+go get -u github.com/i4erkasov/go-pgsql
 ```
 
-## Pool Registry
-
-A package for managing PostgreSQL connection pools using the [pgxpool](https://github.com/jackc/pgx) library. It offers a convenient way to set up and manage database connections for different environments.
-
-### Features
-
-- Easy creation and management of PostgreSQL connection pools.
-- Supports various configurations for different pools.
-- Seamless integration with configuration systems like Viper.
-- Flexible configuration options through functional options pattern.
-
-### Usage the `pgxpool`
-#### Creating a New Pool Registry:
+## Connection Pool Management
 
 #### Using Viper for Configuration
 
@@ -44,6 +32,8 @@ pgsql:
     default:
       nodes: [
         "postgres://user:password@127.0.0.1:5432/db?sslmode=disable&client_encoding=UTF8"
+        "postgres://user:password@127.0.1.2:5432/db?sslmode=disable&client_encoding=UTF8"
+        "postgres://user:password@127.1.1.3:5432/db?sslmode=disable&client_encoding=UTF8"
       ]
       max_conns: 5 # Default 4
       min_conns: 1 # Default 0
@@ -93,14 +83,13 @@ func main() {
     )
 
     if err != nil {
-    // Handle registry creation error
+        // Handle registry creation error
     }
-
-    pool, err := registry.Pools() // is DEFAULT pool getter
-    pool, err := registry.GetPoolName("pool1") // is pool getter by name.
+	
+    //Use the registry
 }
 ```
-### or
+#### or
 
 ```go
 import "github.com/i4erkasov/go-pgsql/pgxpool"
@@ -132,18 +121,26 @@ Configuration Parameters
 - `prefer_simple_protoco`l: Whether to use simple protocol for new connections (default: false).
 
 
+```go
+func main() {
+    // ...
+	
+    // Use the registry
+	
+    pool, err := registry.Pools() // is DEFAULT pool getter
+    // or
+    pool1, err := registry.GetPoolName("pool1") // is pool getter by name.
+    
+    master := pool.Maser() // returns master connections pool
+    slave := pool.Slave() // returns slave connections pool
+}
+```
+
 ## Transaction Management
 
 The package includes a sophisticated transaction manager that allows for simple and complex transactional operations, including support for nested transactions.
 
-### Features
-
-- Easy to use transaction manager with support for context-based transactions.
-- Support for nested transactions, allowing complex transactional workflows.
-- Automatic rollback on errors and panics to maintain data integrity.
-- Simple interface to execute transactional functions.
-
-### Using the `TxManager`
+### Using
 
 #### Starting Transactions
 
@@ -154,16 +151,22 @@ import (
     "github.com/i4erkasov/go-pgsql/tx"
 )
 
-// ...
+func main() {
+    txManager, err := tx.NewTxManager(registry)
+    if err != nil {
+    // Handle error
+    }
 
-txManager, err := tx.NewTxManager(registry)
-if err != nil {
-// Handle error
+    // Use the txManager
 }
+```
 
-ctx, err := txManager.Begin(context.Background())
+#### Beginning Transaction 
+
+```go
+txCtx, err := txManager.Begin(context.Background())
 if err != nil {
-// Handle error
+    // Handle error
 }
 ```
 
@@ -171,7 +174,7 @@ if err != nil {
 Once your operations are complete, `Commit` the transaction:
 
 ```go
-err = txManager.Commit(ctx)
+err = txManager.Commit(txCtx)
 if err != nil {
     // Handle error
 }
@@ -181,7 +184,7 @@ if err != nil {
 If an error occurs, or you need to abort the transaction, call `Rollback`:
 
 ```go
-err = txManager.Rollback(ctx)
+err = txManager.Rollback(txCtx)
 if err != nil {
     // Handle error
 }
@@ -194,19 +197,44 @@ The `WithTx` method allows you to execute a function within the context of a tra
 ```go
 err := txManager.WithTx(ctx, func(ctx context.Context, tx pgxpool.Tx) error {
     // Perform your transactional operations here
+	
+    _, err = tx.Query(ctx, 'query', 'params ...')
+    if err != nil {
+        return err
+    }
+	
+    // ...
+	
     return nil
 })
+
 if err != nil {
     // Handle error
 }
 ```
 
-Nested Transactions
 For more complex scenarios involving nested transactions, use the `WithNestedTx` method:
 
 ```go
 err := txManager.WithNestedTx(ctx, func(ctx context.Context, tx pgxpool.Tx) error {
     // Perform operations within a nested transaction here
+
+    _, err = tx.Query(ctx, 'query', 'params ...')
+    if err != nil {
+        return err 
+    }
+
+    txManager.WithNestedTx(ctx, func(ctx context.Context, tx pgxpool.Tx) error {
+        _, err = tx.Query(ctx, 'query2', 'params ...')
+        if err != nil {
+            return err
+        }
+
+        return nil
+    })
+
+    // ...
+	
     return nil
 })
 if err != nil {
@@ -224,7 +252,7 @@ if err != nil {
 - Support for PostgreSQL databases using [golang-migrate](https://github.com/golang-migrate/migrate).
 - Flexible configuration options through Viper or direct configuration.
 
-### Usage the `Migrator`
+### Using
 
 ### Creating a New Migrator
 
@@ -315,18 +343,69 @@ func main() {
 #### Applying and Reverting Migrations
 
 ```go
-    err := migrator.Up(context.Background())
-    if err != nil {
-        // Handle error
-    }
+err := migrator.Up(context.Background())
+if err != nil {
+    // Handle error
+}
     
-    // To revert migrations
-    err = migrator.Down(context.Background(), 1) // Revert 1 step
-    if err != nil {
-        // Handle error
-    }
+// To revert migrations
+err = migrator.Down(context.Background(), 1) // Revert 1 step
+if err != nil {
+    // Handle error
+}
+```
+
+#### An example of using migration with the [cobra](https://github.com/spf13/cobra) package
+
+```go
+import (
+    "errors"
+    "github.com/i4erkasov/go-pgsql/migrate"
+    "github.com/spf13/cobra"
+    "golang.org/x/exp/slices"
+)
+
+const (
+    MigrationCommand      = "sql-migrate"
+    VersionMigrateService = "0.0.1"
+    MigrationUpArg        = "up"
+    MigrationDownArg      = "down"
+)
+
+var steps int // variable to store the number of steps
+
+var sqlMigrate = &cobra.Command{
+    Use:        MigrationCommand,
+    Short:      "Run database migration",
+    Version:    VersionMigrateService,
+    Args:       cobra.MaximumNArgs(1),
+    ArgAliases: []string{MigrationUpArg, MigrationDownArg},
+    RunE: func(cmd *cobra.Command, args []string) (err error) {
+        var migration migrate.SQLMigrator
+        if migration, err = migrate.NewWithViper(cfg.Sub("app")); err != nil {
+            return err
+        }
+
+        switch true {
+        case slices.Contains(args, MigrationUpArg):
+            return migration.Up(cmd.Context())
+        case slices.Contains(args, MigrationDownArg):
+            return migration.Down(cmd.Context(), steps)
+        default:
+            return errors.New("invalid argument. please specify 'up' or 'down' for migration")
+        }
+    },
+}
+
+func init() {
+    sqlMigrate.Flags().IntVarP(&steps, "steps", "s", 1, "Number of steps to migrate down")
+
+    cmd.AddCommand(sqlMigrate)
+}
 ```
 
 ## Contributing
 
 Contributions to the `go-pgsql` package are welcome. Please submit pull requests to [GitHub repository](https://github.com/i4erkasov/go-pgsql).
+
+Licensed under the [MIT License](LICENSE).
