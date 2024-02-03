@@ -1,6 +1,6 @@
 module github.com/i4erkasov/go-pgsql
 
-go 1.21.5
+go 1.21
 
 require (
 	github.com/golang-migrate/migrate/v4 v4.17.0
