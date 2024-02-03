@@ -1,4 +1,5 @@
 # go-pgsql
+[![build workflow](https://github.com/i4erkasov/go-pgsql/actions/workflows/build.yml/badge.svg)](https://github.com/i4erkasov/go-pgsql/actions)
 [![PkgGoDev](https://godoc.org/github.com/i4erkasov/go-pgsql?status.svg)](https://pkg.go.dev/github.com/i4erkasov/go-pgsql?tab=doc)
 ![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/i4erkasov/go-pgsql)
 [![Go Report Card](https://goreportcard.com/badge/github.com/i4erkasov/go-pgsql)](https://goreportcard.com/report/github.com/i4erkasov/go-pgsql)
@@ -145,9 +146,9 @@ The package includes a sophisticated transaction manager that allows for simple 
 
 ### Using
 
-#### Starting Transactions
+#### Initializing `TxManager`
 
-To begin a transaction, simply call the `Begin` method on an instance of `TxManager`:
+To manage transactions, you need to create an instance of `TxManager` by passing it a `registry` from the package `"github.com/i4erkasov/go-pgsql/pgxpool"`. `TxManager` uses the connection pool provided through registry to manage transactions in your application.
 
 ```go
 import (
@@ -164,41 +165,14 @@ func main() {
 }
 ```
 
-#### Beginning Transaction 
-
-```go
-txCtx, err := txManager.Begin(context.Background())
-if err != nil {
-    // Handle error
-}
-```
-
-#### Committing Transactions
-Once your operations are complete, `Commit` the transaction:
-
-```go
-err = txManager.Commit(txCtx)
-if err != nil {
-    // Handle error
-}
-```
-
-#### Rolling Back Transactions
-If an error occurs, or you need to abort the transaction, call `Rollback`:
-
-```go
-err = txManager.Rollback(txCtx)
-if err != nil {
-    // Handle error
-}
-```
+`TxManager` offers `WithTx` and `WithNestedTx` methods to perform operations within the context of transactions. These methods simplify transaction management by automatically handling the start, completion, and rollback of transactions as necessary.
 
 #### Executing Functions Within a Transaction
 
 The `WithTx` method allows you to execute a function within the context of a transaction. It manages the lifecycle of the transaction automatically:
 
 ```go
-err := txManager.WithTx(ctx, func(ctx context.Context, tx pgxpool.Tx) error {
+err := txManager.WithTx(ctx, func(ctx context.Context, tx pgx.Tx) error {
     // Perform your transactional operations here
 	
     _, err = tx.Query(ctx, 'query', 'params ...')
@@ -216,10 +190,12 @@ if err != nil {
 }
 ```
 
+#### Executing Functions WithNestedTx a Transaction
+
 For more complex scenarios involving nested transactions, use the `WithNestedTx` method:
 
 ```go
-err := txManager.WithNestedTx(ctx, func(ctx context.Context, tx pgxpool.Tx) error {
+err := txManager.WithNestedTx(ctx, func(ctx context.Context, tx pgx.Tx) error {
     // Perform operations within a nested transaction here
 
     _, err = tx.Query(ctx, 'query', 'params ...')
@@ -227,7 +203,7 @@ err := txManager.WithNestedTx(ctx, func(ctx context.Context, tx pgxpool.Tx) erro
         return err 
     }
 
-    txManager.WithNestedTx(ctx, func(ctx context.Context, tx pgxpool.Tx) error {
+    txManager.WithNestedTx(ctx, func(ctx context.Context, tx pgx.Tx) error {
         _, err = tx.Query(ctx, 'query2', 'params ...')
         if err != nil {
             return err

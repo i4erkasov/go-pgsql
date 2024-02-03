@@ -1,0 +1,17 @@
+all: true
+with-expecter: false
+filename: "{{.InterfaceName | snakecase}}_mock.go"
+mockname: "{{.InterfaceName}}Mock"
+
+packages:
+  github.com/i4erkasov/go-pgsql:
+    interfaces:
+      TxMock:
+        config:
+          dir: "./pgx"
+          outpkg: "pgx"
+          mockname: "{{.InterfaceName}}"
+          filename: "{{.InterfaceName | snakecase}}.go"
+  github.com/i4erkasov/go-pgsql/pgx:
+    config:
+      dir: "./pgx"
