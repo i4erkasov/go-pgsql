@@ -5,13 +5,14 @@ mockname: "{{.InterfaceName}}Mock"
 
 packages:
   github.com/i4erkasov/go-pgsql:
+    config:
+      dir: "./pgx"
+      outpkg: "pgx"
+      mockname: "{{.InterfaceName}}"
+      filename: "{{.InterfaceName | snakecase}}.go"
     interfaces:
       TxMock:
-        config:
-          dir: "./pgx"
-          outpkg: "pgx"
-          mockname: "{{.InterfaceName}}"
-          filename: "{{.InterfaceName | snakecase}}.go"
+      RowMock:
   github.com/i4erkasov/go-pgsql/pgx:
     config:
       dir: "./pgx"

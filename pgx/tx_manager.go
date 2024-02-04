@@ -12,6 +12,9 @@ import (
 // Tx is an alias to pgx.Tx
 type Tx = pgx.Tx
 
+// Row is an alias to pgx.Row
+type Row = pgx.Row
+
 // Conn defines the interface for connection
 type Conn interface {
 	Begin(ctx context.Context) (Tx, error)

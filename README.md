@@ -169,7 +169,10 @@ func main() {
 
 #### Executing Functions Within a Transaction
 
-The `WithTx` method allows you to execute a function within the context of a transaction. It manages the lifecycle of the transaction automatically:
+The [WithTx](./pgx/README.md) method allows you to execute a function within the context of a transaction. It manages the lifecycle of the transaction automatically:
+
+For detailed usage examples and more information, see the [Transaction Management section](./pgx/README.md#transaction-management-with-transactor) in our README.
+
 
 ```go
 err := txManager.WithTx(ctx, func(ctx context.Context, tx pgx.Tx) error {
@@ -192,7 +195,7 @@ if err != nil {
 
 #### Executing Functions WithNestedTx a Transaction
 
-For more complex scenarios involving nested transactions, use the `WithNestedTx` method:
+For more complex scenarios involving nested transactions, use the [WithNestedTx](./pgx/README.md) method:
 
 ```go
 err := txManager.WithNestedTx(ctx, func(ctx context.Context, tx pgx.Tx) error {

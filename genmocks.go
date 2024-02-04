@@ -12,3 +12,7 @@ import "github.com/i4erkasov/go-pgsql/pgx"
 type TxMock interface {
 	pgx.Tx
 }
+
+type RowMock interface {
+	pgx.Row
+}
