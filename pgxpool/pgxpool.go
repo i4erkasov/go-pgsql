@@ -2,9 +2,10 @@ package pgxpool
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/spf13/viper"
-	"strings"
 )
 
 // Pool is an alias to pgxpool.Pool

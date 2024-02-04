@@ -2,9 +2,10 @@ package migrate
 
 import (
 	"fmt"
-	"github.com/spf13/viper"
 	"os"
 	"strings"
+
+	"github.com/spf13/viper"
 )
 
 var required = []string{"user", "password", "host", "port", "dbname"}

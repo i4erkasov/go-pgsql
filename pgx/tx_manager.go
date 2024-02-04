@@ -3,9 +3,10 @@ package pgx
 import (
 	"context"
 	"errors"
+	"sync/atomic"
+
 	"github.com/i4erkasov/go-pgsql/pgxpool"
 	"github.com/jackc/pgx/v4"
-	"sync/atomic"
 )
 
 // Tx is an alias to pgx.Tx
@@ -174,7 +175,7 @@ func (t *Transactor) beginNestedTx(ctx context.Context) (context.Context, bool, 
 	if err != nil {
 		// In case of an error, decrement the counter back.
 		ctx = tickTxCounter(ctx, -1)
-		return nil, false, err
+		return ctx, false, err
 	}
 	return ctx, true, nil
 }
