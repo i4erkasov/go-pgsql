@@ -1,6 +1,8 @@
 package go_pgsql
 
-import "github.com/i4erkasov/go-pgsql/pgx"
+import (
+	"github.com/i4erkasov/go-pgsql/pgx"
+)
 
 // Deprecated: in mockery v3 this approach will be removed
 // rename the file .mockery.yaml.dist to .mockery.yaml and remove go:generate
